@@ -30,13 +30,13 @@ class Authentication < ActiveRecord::Base
   memoize :api_client
 
   def to_person
-    if self.api_client
-      if self.uid.present?
-        api_client.get(self.uid)
-      else
-        Person.new
-      end
-    else
+    #if self.api_client
+    #  if self.uid.present?
+    #    api_client.get(self.uid)
+    #  else
+    #    Person.new
+    #  end
+    #else
       Person.new(
           :name => self.info[:name],
           :location => self.info[:location],
@@ -44,7 +44,7 @@ class Authentication < ActiveRecord::Base
           :photo_import_url => self.info[:image],
           :url => self.info[:urls].try(:values).try(:first)
         )
-    end
+    #end
   end
 
   #--[ Updating information at auth-time ]-------------------------------------
@@ -55,10 +55,7 @@ class Authentication < ActiveRecord::Base
   end
 
   def extract_credentials_from_omniauth(omniauth)
-    if omniauth.has_key?('credentials')
-      self.access_token = omniauth['credentials']['token']
-      self.access_token_secret = omniauth['credentials']['secret']
-    end
+    self.info = (omniauth.info||{}).to_hash.symbolize_keys!
   end
 
   # We only want to retain certain user info from omniauth responses, depending on the provider.
